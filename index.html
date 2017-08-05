@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script src="http://d3js.org/d3.v2.min.js?2.9.3"></script>
+<style>
+
+    .link {
+        stroke: #aaa;
+    }
+
+    .node text {
+        display: none;
+        stroke:#333;
+        cursor:pointer;
+    }
+
+    .node circle{
+        stroke:#fff;
+        stroke-width:3px;
+        fill: green;
+    }
+
+    .node:hover circle {
+        fill: #000;
+    }
+
+    .node:hover text {
+        display: inline;
+        color: aquamarine;
+    }
+
+    #top{
+        alignment: top;
+    }
+    #btn{
+        width: 100px;
+        height: 25px;
+        fill: #a8d0f4;
+    }
+
+</style>
+
+
+
+<body>
+<p>Select data from menu below. To change the visualization, reload the page then select new data.</p>
+<div id="top">
+    <select id="selection" onchange="changeFunction()">
+        <option>Select</option>
+        <option value="miserables.json">Miserables</option>
+        <option value="dolphins.json">Dolphins</option>
+        <option value="lesmis.json">Les Mis</option>
+        <option value="football.json">Football</option>
+        <option value="celegansneural.json">C Elegans Neural</option>
+    </select>
+</div>
+<div id="filter">
+    <button id="btn" onclick="clickFunction()">Filter</button>
+</div>
+<div id="slider"></div>
+<script>
+
+    var width = 960,
+        height = 550;
+
+    var svg = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    var force = d3.layout.force()
+        .gravity(.05)
+        .distance(100)
+        .charge(-100)
+        .size([width, height]);
+
+
+
+
+//    var getSelect = document.getElementById("selection");
+//    var selection = getSelect.options[getSelect.selectedIndex].value;
+
+
+//    document.getElementById("selection").addEventListener("change",changeFunction);
+
+
+
+    function changeFunction() {
+        var x = document.getElementById("selection");
+        var selection = x.options[x.selectedIndex].value;
+//        var oldSelection = selection;
+
+
+
+        d3.json(selection, function (json) {
+            force
+                .nodes(json.nodes)
+                .links(json.links)
+                .start();
+
+            var link = svg.selectAll(".link")
+                .data(json.links)
+                .enter().append("line")
+                .attr("class", "link")
+                .style("stroke-width", function (d) {
+                    return Math.sqrt(d.weight);
+                });
+
+            var node = svg.selectAll(".node")
+                .data(json.nodes)
+                .enter().append("g")
+                .attr("class", "node")
+                .call(force.drag);
+
+            node.append("circle")
+                .attr("r", "5");
+
+            node.append("text")
+                .attr("dx", 12)
+                .attr("dy", ".35em")
+                .text(function (d) {
+                    return d.name
+                });
+
+            force.on("tick", function () {
+                link.attr("x1", function (d) {
+                    return d.source.x;
+                })
+                    .attr("y1", function (d) {
+                        return d.source.y;
+                    })
+                    .attr("x2", function (d) {
+                        return d.target.x;
+                    })
+                    .attr("y2", function (d) {
+                        return d.target.y;
+                    });
+
+                node.attr("transform", function (d) {
+                    return "translate(" + d.x + "," + d.y + ")";
+                });
+            });
+        });
+    }//end of change function
+
+function clickFunction() {
+    document.getElementById("btn");
+    //var forceDistance =
+}
+    
+
+
+//    force
+//        .size([w,h])
+//        .gravity(0)
+//        .nodes(nodes)
+//        .links(links)
+//        .linkDistance(linkDistance)
+//        .start();
+
+
+</script>
+</body>
